@@ -17,9 +17,9 @@
   <div class="card-header d-flex justify-content-between align-items-center">
     <h4 class="mb-0">Data Penjualan</h4>
     @if (Auth::user()->Role == "kasir")
-    <a href="{{ route('penjualan.create') }}" class="btn btn-primary">
-      + Tambah Penjualan
-    </a>
+      <a href="{{ route('penjualan.create') }}" class="btn btn-primary">
+        + Tambah Penjualan
+      </a>
     @endif
   </div>
 
@@ -48,28 +48,34 @@
             <td>{{ ucfirst($p->Metode) }}</td>
             <td>{{ $p->user->Nama ?? '-' }}</td>
             <td class="text-center">
+
+              {{-- Tombol Detail (semua role bisa) --}}
               <a href="{{ route('penjualan.show', $p->PenjualanID) }}" 
                  class="btn btn-info btn-sm">
                 Detail
               </a>
 
-              {{-- Tombol Cetak Struk --}}
-              <a href="{{ route('penjualan.cetak', $p->PenjualanID) }}" target="_blank"
-                 class="btn btn-success btn-sm">
-                Cetak
-              </a>
+              {{-- Jika role = kasir, tampilkan Cetak & Hapus --}}
+              @if (Auth::user()->Role == "kasir")
+                {{-- Tombol Cetak Struk --}}
+                <a href="{{ route('penjualan.cetak', $p->PenjualanID) }}" target="_blank"
+                   class="btn btn-success btn-sm">
+                  Cetak
+                </a>
 
-              {{-- Tombol Hapus --}}
-              <form action="{{ route('penjualan.destroy', $p->PenjualanID) }}" 
-                    method="POST" class="d-inline">
-                @csrf
-                @method('DELETE')
-                <button type="submit" 
-                        class="btn btn-danger btn-sm" 
-                        onclick="return confirm('Yakin hapus data ini?')">
-                  Hapus
-                </button>
-              </form>
+                {{-- Tombol Hapus --}}
+                <form action="{{ route('penjualan.destroy', $p->PenjualanID) }}" 
+                      method="POST" class="d-inline">
+                  @csrf
+                  @method('DELETE')
+                  <button type="submit" 
+                          class="btn btn-danger btn-sm" 
+                          onclick="return confirm('Yakin hapus data ini?')">
+                    Hapus
+                  </button>
+                </form>
+              @endif
+              
             </td>
           </tr>
         @empty

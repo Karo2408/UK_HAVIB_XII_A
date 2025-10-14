@@ -10,6 +10,8 @@
     use App\Http\Controllers\PenjualanController;
     use App\Http\Controllers\PembayaranController;
     use App\Http\Controllers\LaporanController;
+    use App\Http\Controllers\SettingController;
+
     
     Route::get('/', function () {
         return redirect()->route('login');
@@ -51,6 +53,10 @@
 
             Route::get('/laporan', [LaporanController::class, 'index'])->name('laporan.index');
             Route::get('/laporan/export-pdf', [LaporanController::class, 'exportPdf'])->name('laporan.exportPDF');
+      
+            //setting
+            Route::get('/setting', [SettingController::class, 'index'])->name('setting.index');
+            Route::post('/setting', [SettingController::class, 'update'])->name('setting.update');
         });
 
     //kasir

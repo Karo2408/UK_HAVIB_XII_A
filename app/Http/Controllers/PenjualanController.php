@@ -8,6 +8,7 @@ use App\Penjualan;
 use App\Pelanggan;
 use App\Produk;
 use App\DetailPenjualan;
+use App\Setting;
 use Barryvdh\DomPDF\Facade\Pdf;
 
 class PenjualanController extends Controller
@@ -27,7 +28,7 @@ class PenjualanController extends Controller
         $pelanggan = Pelanggan::all();
         return view('penjualan.create', compact('produk', 'pelanggan'));
     }
-        
+
     public function store(Request $request)
     {
         $request->validate([
@@ -42,19 +43,23 @@ class PenjualanController extends Controller
 
         DB::beginTransaction();
         try {
+            // 🔹 Ambil diskon member dari settings
+            $diskonSetting = Setting::where('key_name', 'diskon_global')->value('value');
+            $diskonMemberPersen = is_numeric($diskonSetting) ? floatval($diskonSetting) : 0;
+
             $penjualan = Penjualan::create([
                 'TanggalPenjualan' => $request->TanggalPenjualan,
                 'PelangganID'      => $request->PelangganID,
                 'TotalHarga'       => 0,
-                'TotalDiskon'      => 0,    
-                'UserID'           => 1,
+                'TotalDiskon'      => 0,
+                'UserID'           => auth()->id(),
                 'Metode'           => $request->Metode,
                 'Status'           => 'selesai',
             ]);
 
             $total = 0;
             $totalDiskon = 0;
-            $isMember = !empty($request->PelangganID); // true kalau pelanggan, false kalau umum
+            $isMember = !empty($request->PelangganID); // true kalau pelanggan (member)
 
             foreach ($request->ProdukID as $i => $produkId) {
                 $produk   = Produk::findOrFail($produkId);
@@ -62,8 +67,8 @@ class PenjualanController extends Controller
                 $harga    = $produk->Harga;
                 $subtotal = $harga * $jumlah;
 
-                // 💡 Diskon 5% hanya untuk pelanggan yang beli >= 5 item
-                $diskon = ($isMember && $jumlah >= 5) ? $subtotal * 0.05 : 0;
+                // 💡 Diskon diambil dari pengaturan jika member
+                $diskon = $isMember ? ($subtotal * $diskonMemberPersen / 100) : 0;
 
                 $total       += $subtotal - $diskon;
                 $totalDiskon += $diskon;
@@ -117,7 +122,7 @@ class PenjualanController extends Controller
         $penjualan = Penjualan::with(['pelanggan', 'user', 'detailPenjualan.produk'])->findOrFail($id);
         return view('penjualan.show', compact('penjualan'));
     }
-    
+
     public function cetak($id)
     {
         $penjualan = Penjualan::with('detailPenjualan.produk')->findOrFail($id);
@@ -132,10 +137,7 @@ class PenjualanController extends Controller
         try {
             $penjualan = Penjualan::findOrFail($id);
 
-            // Hapus detail dulu
             DetailPenjualan::where('PenjualanID', $penjualan->PenjualanID)->delete();
-
-            // Hapus penjualan
             $penjualan->delete();
 
             DB::commit();

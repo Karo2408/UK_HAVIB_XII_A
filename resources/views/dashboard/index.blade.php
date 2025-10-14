@@ -67,17 +67,53 @@
             </div>
         </div>
 
-        {{-- Grafik Sisa Produk (kecil) --}}
+        {{-- Grafik Sisa Produk & Tabel Minimum --}}
         <div class="row mt-4">
-            <div class="col-lg-6 mx-auto">
+            <div class="col-lg-6">
                 <div class="card shadow-sm">
-                    <div class="card-header d-flex justify-content-between align-items-center">
+                    <div class="card-header">
                         <h6 class="mb-0">Grafik Sisa Produk (Stok)</h6>
                     </div>
-                    <div class="card-body d-flex justify-content-center">
+                    <div class="card-body d-flex flex-column align-items-center justify-content-center">
                         <div style="width:300px; height:300px;">
                             <canvas id="sisaProdukChart"></canvas>
                         </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-6">
+                <div class="card shadow-sm border-success">
+                    <div class="card-header bg-success-subtle">
+                        <h6 class="mb-0 text-success fw-bold"> Minimum Produk </h6>
+                    </div>
+                    <div class="card-body table-responsive">
+                        <table class="table table-bordered table-hover mb-0">
+                            <thead class="table-success text-center">
+                                <tr>
+                                    <th>No</th>
+                                    <th>Nama Produk</th>
+                                    <th>Stok</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @php
+                                    $minimumProduk = \App\Produk::where('Stok', '<', 10)->get();
+                                @endphp
+
+                                @forelse($minimumProduk as $p)
+                                <tr class="text-center">
+                                    <td>{{ $loop->iteration }}</td>
+                                    <td>{{ $p->NamaProduk }}</td>
+                                    <td class="fw-bold text-danger">{{ $p->Stok }}</td>
+                                </tr>
+                                @empty
+                                <tr>
+                                    <td colspan="3" class="text-center text-success fw-bold">Semua stok aman ✅</td>
+                                </tr>
+                                @endforelse
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </div>
@@ -85,6 +121,7 @@
     </div>
 </div>
 @endsection
+
 
 @section('scripts')
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -132,7 +169,7 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     });
 
-    // === Grafik Pie Sisa Produk (kecil) ===
+    // === Grafik Pie Sisa Produk (TIDAK DIUBAH) ===
     const ctxPie = document.getElementById('sisaProdukChart').getContext('2d');
     const produkLabels = [];
     const produkStok = [];
@@ -143,7 +180,7 @@ document.addEventListener("DOMContentLoaded", function () {
     @endforeach
 
     new Chart(ctxPie, {
-        type: 'doughnut', // pakai doughnut biar keren dan kecil
+        type: 'doughnut',
         data: {
             labels: produkLabels,
             datasets: [{
@@ -158,9 +195,18 @@ document.addEventListener("DOMContentLoaded", function () {
         },
         options: {
             responsive: true,
-            cutout: '60%', // bikin tengah bolong biar lebih kecil
+            cutout: '60%',
             plugins: {
-                legend: { position: 'bottom' },
+                legend: {
+                    position: 'bottom',
+                    labels: {
+                        boxWidth: 20,
+                        padding: 10,
+                        font: { size: 12 },
+                        usePointStyle: true,
+                        pointStyle: 'circle'
+                    }
+                },
                 tooltip: {
                     callbacks: {
                         label: function(context) {
@@ -168,9 +214,36 @@ document.addEventListener("DOMContentLoaded", function () {
                         }
                     }
                 }
+            },
+            layout: {
+                padding: { top: 10, bottom: 10 }
             }
         }
     });
 });
 </script>
+
+<style>
+#sisaProdukChart {
+    margin-bottom: 10px;
+}
+.chartjs-render-monitor + div ul {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    justify-content: center !important;
+    gap: 8px 16px !important;
+    text-align: center !important;
+    list-style: none !important;
+    padding: 0 !important;
+}
+.chartjs-render-monitor + div li {
+    display: flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+    font-size: 13px !important;
+}
+.table td, .table th {
+    vertical-align: middle !important;
+}
+</style>
 @endsection

@@ -8,11 +8,10 @@
 </style>
 
 <div class="center">
-  <h3>SS Mart</h3>
-  <p>
-    Jl. H Midi II, Limo, Kec. Limo, Kota Depok, Jawa Barat 16515<br>
-    Telp:(021)7534018
-  </p>
+  <h3>{{ \App\Setting::getValue('pos_name') }}</h3>
+<p>{{ \App\Setting::getValue('store_address') }}</p>
+<p>Telp: {{ \App\Setting::getValue('store_phone') }}</p>
+
 </div>
 
 <div class="line"></div>
@@ -114,10 +113,10 @@
 <div class="line"></div>
 
 <div class="center">
+              {!! \App\Setting::getValue('footer_note') ?? '<p><strong>--- Terima Kasih ---</strong></p><p>Barang yang sudah dibeli tidak dapat dikembalikan</p>' !!}
+
   <p>
-    --- Terima Kasih ---<br>
-    Belanja Hemat, Ya jelas di <br>
-    <b>SS Mart</b><br><br>
+    <br>
     <small>{{ \Carbon\Carbon::now('Asia/Jakarta')->format('d/m/Y H:i:s') }}</small>
   </p>
 </div>
