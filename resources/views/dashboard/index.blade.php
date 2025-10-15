@@ -4,6 +4,33 @@
 
 @section('content')
 <div class="container-fluid">
+    <!-- Tambahan Waktu, Hari, Tanggal, dan Jam -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card shadow-sm border-0 rounded-3">
+                <div class="card-body py-3">
+                    <div class="row align-items-center">
+                        <div class="col-md-8">
+                            <div class="d-flex align-items-center">
+                                <div class="fs-2 text-primary me-3">
+                                    <i class="ti ti-clock"></i>
+                                </div>
+                                <div>
+                                    <div class="fs-5 fw-bold" id="currentTime">14:30:45</div>
+                                    <div class="text-muted" id="currentDate">Selasa, 15 Oktober 2024</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4 text-md-end">
+                            <div class="fw-semibold text-success" id="greeting">Selamat Siang!</div>
+                            <div class="badge bg-light text-dark mt-1" id="currentDay">Hari Kerja</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div class="row g-3 mb-4">
         <div class="row">
             <div class="col-md-3 mb-3">
@@ -109,7 +136,7 @@
                                 </tr>
                                 @empty
                                 <tr>
-                                    <td colspan="3" class="text-center text-success fw-bold">Semua stok aman ✅</td>
+                                    <td colspan="3" class="text-center text-success fw-bold">Semua stok aman</td>
                                 </tr>
                                 @endforelse
                             </tbody>
@@ -122,10 +149,40 @@
 </div>
 @endsection
 
-
 @section('scripts')
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
+// Fungsi untuk memperbarui waktu secara real-time
+function updateTime() {
+    const now = new Date();
+    
+    // Format tanggal: Selasa, 15 Oktober 2024
+    const optionsDate = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+    document.getElementById('currentDate').textContent = now.toLocaleDateString('id-ID', optionsDate);
+    
+    // Format waktu: 14:30:45
+    const timeString = now.toLocaleTimeString('id-ID', { hour12: false });
+    document.getElementById('currentTime').textContent = timeString;
+    
+    // Tentukan hari kerja atau akhir pekan
+    const dayOfWeek = now.getDay();
+    const isWeekend = (dayOfWeek === 0 || dayOfWeek === 6);
+    document.getElementById('currentDay').textContent = isWeekend ? 'Akhir Pekan' : 'Hari Kerja';
+    
+    // Tentukan salam berdasarkan waktu
+    const hour = now.getHours();
+    let greeting = '';
+    if (hour < 11) greeting = 'Selamat Pagi!';
+    else if (hour < 15) greeting = 'Selamat Siang!';
+    else if (hour < 19) greeting = 'Selamat Sore!';
+    else greeting = 'Selamat Malam!';
+    document.getElementById('greeting').textContent = greeting;
+}
+
+// Panggil fungsi pertama kali dan atur interval pembaruan
+updateTime();
+setInterval(updateTime, 1000);
+
 document.addEventListener("DOMContentLoaded", function () {
     // === Grafik Penjualan Bulanan ===
     const ctx = document.getElementById('penjualanChart').getContext('2d');
